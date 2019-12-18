@@ -14,6 +14,7 @@ class MainViewController: UIViewController, SFSpeechRecognizerDelegate {
     @IBOutlet weak var textBox: UITextView!
     @IBOutlet weak var start: UIButton!
     @IBOutlet weak var stop: UIButton!
+    @IBOutlet weak var recordingText: UILabel!
     
     let speechRecognizer: SFSpeechRecognizer? = SFSpeechRecognizer(locale: Locale.init(identifier: "en-us"))
     var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
@@ -22,6 +23,7 @@ class MainViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        recordingText.text = ""
         speechRecognizer?.delegate = self
         SFSpeechRecognizer.requestAuthorization{
             status in
@@ -85,15 +87,33 @@ class MainViewController: UIViewController, SFSpeechRecognizerDelegate {
                 print(result?.transcriptions)
                 
                 let bestTranscription = result?.bestTranscription.formattedString
-                if (bestTranscription == "hello" || bestTranscription == "yes" || bestTranscription == "no"){
-                    print("correct")
+                /*
+                if(bestTranscription) != nil {
                     self.textBox.text = bestTranscription
-                } else{
+                } else {
+                    self.textBox.text = "Did not translate"
+                }*/
+                var transcribed = ""
+                if bestTranscription != nil{
+                     transcribed = bestTranscription!
+                } else {
                     print(bestTranscription)
                     print("incorrect")
                     self.textBox.text = "Did not translate"
+                    self.recordingText.text = ""
+                    return
                 }
+                print(transcribed)
                 
+                if (transcribed == "Adventure" || transcribed == "Apple" || transcribed == "Development"){
+                    print("correct")
+                    self.textBox.text = transcribed
+                    self.recordingText.text = "Special Keyword!"
+                } else {
+                    self.textBox.text = transcribed
+                    self.recordingText.text = ""
+                }
+                print(transcribed)
             }
             
         }
@@ -112,14 +132,9 @@ class MainViewController: UIViewController, SFSpeechRecognizerDelegate {
 
 
     @IBAction func startButtonPress(_ sender: Any) {
-        if audioEngine.isRunning{
-            audioEngine.stop()
-            recognitionRequest?.endAudio()
-            start.isEnabled = false
-            start.setTitle("Record", for: .normal)
-        } else{
+        if audioEngine.isRunning == false{
             startRecording()
-            start.setTitle("Stop", for: .normal)
+            recordingText.text = "Recording"
         }
     }
 
@@ -128,20 +143,9 @@ class MainViewController: UIViewController, SFSpeechRecognizerDelegate {
             audioEngine.stop()
             recognitionRequest?.endAudio()
             start.isEnabled = false
-            start.setTitle("Record", for: .normal)
-        } else{
-            startRecording()
-            start.setTitle("Stop", for: .normal)
+            
+            //start.setTitle("Record", for: .normal)
         }
     }
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
